@@ -84,6 +84,7 @@ i0jy = nearestpoint([trial.start_t],js_y(:,2));
 i1jy = nearestpoint([trial.end_t],js_y(:,2));
 
 % now we have to loop :-(
+ntrials=size(trial,2);
 for i=1:ntrials
 
   ii = i0cx(i):i1cx(i);
