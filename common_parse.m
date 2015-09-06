@@ -10,6 +10,13 @@
 
 % file is loaded here
 
+
+%% RECENTLY COMMENTED!!
+% picking trial states from trial start to the next trial start
+% this avoids alignment issues if trials are aborted inbetween sessions
+% also when merging two or more sessions
+
+
 warning('OFF','MATLAB:load:variableNotFound');
 warning('OFF','MATLAB:load:variablePatternNotFound');  
 
@@ -17,8 +24,8 @@ WORKSPACE_BOUNDS = [-25 25 ; -25 25];   % very generous workspace boundaries
 MY_EPS = 1e-4; % a small number, but not thaaat small
 
 if (~exist('cursor_x','var'))
-  cursor_x = pos_x;
-  cursor_y = pos_y;
+  cursor_x = js_x;
+  cursor_y = js_y;
 end
 
 % this can happen if the task is only in the x-axis (i.e. never update y)
@@ -96,14 +103,31 @@ if (~isempty(tmp))
 end
 clear tmp;
 
+
+%% RECENTLY COMMENTED!!
+% picking trial states from trial start to the next trial start
+% this avoids alignment issues if trials are aborted inbetween sessions
+% also when merging two or more sessions
+
 % ignore trial(s) that are started right before the task is ended
-tmp = length(trial_start)-length(trial_end);
-if (tmp>0)
-    trial_start = trial_start(1:end-tmp); 
-end
-clear tmp;
+% tmp = length(trial_start)-length(trial_end);
+% if (tmp>0)
+%     trial_start = trial_start(1:end-tmp); 
+% end
+% clear tmp;
 
 ntrials = length(trial_start);
+
+% picking up completed trials; omitting the last unfinised one.
+if length(trial_start) > length(trial_end)
+    tmp = length(trial_start) - length(trial_end);
+    ntrials = length(trial_end);
+    trial_start = trial_start(1:end-tmp);
+    if tmp>1 
+        disp('warning: more than one unfinished trials');
+    end
+    clear tmp
+end
 
 if (ntrials == 0)
   warning('common_parse:no_trials','No completed trials in session!'); 
@@ -119,7 +143,7 @@ trial(ntrials) = struct( ...
     'len', [], ...
     'states', [], ...       % the states for this trial
     'states_t', [] ...      % time of these states
-);
+    );
 
 outcome = state(trial_end-1,1); % whatever comes before ST_INTERTRIAL
 outcome_time = state(trial_end-1,2);  % time of outcome state
@@ -127,16 +151,20 @@ start_time = state(trial_start,2);
 end_time = state(trial_end,2);
 trial_len = end_time - start_time;
 
+
+
 % fill the trial structure
 for i=1:ntrials
-   trial(i).outcome = outcome(i);
-   trial(i).outcome_t = outcome_time(i);
-   trial(i).start_t = start_time(i);
-   trial(i).end_t = end_time(i);
-   trial(i).len = trial_len(i);
-   trial(i).states = state(trial_start(i):trial_end(i),1);
-   trial(i).states_t = state(trial_start(i):trial_end(i),2);
+    trial(i).outcome = outcome(i);
+    trial(i).outcome_t = outcome_time(i);
+    trial(i).start_t = start_time(i);
+    trial(i).end_t = end_time(i);
+    trial(i).len = trial_len(i);
+    trial(i).states = state(trial_start(i):trial_end(i),1);
+    trial(i).states_t = state(trial_start(i):trial_end(i),2);
+    
 end
+
 
 clear i;
 clear outcome outcome_time start_time end_time trial_len;
