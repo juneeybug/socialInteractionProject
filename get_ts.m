@@ -13,6 +13,9 @@
 % names     - cell array of spike channel names (maps with identity)
 
 function [spikes,names] = get_ts(fname,varargin)
+global DATADIR
+global mk   
+
 
     error(nargchk(1,2,nargin,'struct'));
 
@@ -23,19 +26,38 @@ function [spikes,names] = get_ts(fname,varargin)
         usortflag = varargin{i-1};
       end
     end
-
-    % put timestamp data in a sensible format
-    if (usortflag)
-      rgxp = '^(RHA|LHL|RHA|RHL|sig)\d?_?\d{3}[abcdui]$';
+    try
+    if(strmatch(mk,'mango'))
+        ismango = true;
     else
-      rgxp = '^(LHA|LHL|RHA|RHL|sig)\d?_?\d{3}[abcd]$';
+        ismango = false;
+    end        
+    catch
+        i
     end
-   
-    load(fname,'-regexp',rgxp);
-    sigs = who('-regexp',rgxp);
-    
-    ts    = []; ident = [];
-    
+%     ismango = false;
+    % put timestamp data in a sensible format
+    if(ismango)
+      rgxp = '^(LHA|LHL|RHA|RHL|sig)\d?_?\d{3}[abcd]$';
+      load(fname{1},'-regexp',rgxp);
+      sigs = who('-regexp',rgxp);
+    else       
+              
+%       rgxp = '^(L|R|sig)\d\(A|B|C)?_?d{3}';
+      rgxp = '^(L|R|sig)\d\(A|B|C)?';
+%       rgxp = '^(L|R)?';
+      load(fname{1},'-regexp',rgxp);
+%       clear *_wf *_fit *_thr *_tem *_wf_ts
+      sigs = who('-regexp',rgxp);
+      
+      if length(sigs)< 2
+          rgxp = '^(sig)\d?_?\d{3}[abcd]$';
+          load(fname{1},'-regexp',rgxp);
+          sigs = who('-regexp',rgxp);
+      end
+    end
+
+    ts = []; ident = [];
     for i=1:size(sigs,1);
       ts      = [ ts ; eval(sigs{i}) ];
       ident   = [ ident ; i*ones(size(eval(sigs{i}))) ];
