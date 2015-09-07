@@ -205,7 +205,8 @@ beep;
 	    if (length(temptime) < length(Strobed))
 	        s = sprintf('out file has %d fewer strobes than plxmat file. truncating...', length(Strobed)-length(temptime));
             flog_count = flogger(s);
-            Strobed = Strobed(:,1:length(temptime));
+            Strobed = Strobed(:,1:length(temptime)); % use when outfile was closed earlier than plx file
+%             Strobed = Strobed(:,end-length(temptime)+1:end); % use when a new 2nd outfile was created when plx was running
 	    else
 	    	flog_count = flogger('plxmat file has fewer strobes than outfile. was plexon file closed first by mistake? truncating...');
             beep;
