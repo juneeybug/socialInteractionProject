@@ -3,8 +3,9 @@ ntrials=size(trial,2);
 
 
 for i=1:ntrials
-    if ((trial(i).outcome == 104)||(trial(i).outcome == 105)||(trial(i).outcome == 106)||(trial(i).outcome == 107))
-        
+    tstates = find(trial(i).states ==103);
+    % if ((trial(i).outcome == 104)||(trial(i).outcome == 105)||(trial(i).outcome == 106)||(trial(i).outcome == 107))
+     if ~isempty(tstates)   
         % target location is logged at state = 103, so looking around that
         % time
         start = trial(i).states_t(trial(i).states == 103)-0.2;
@@ -20,6 +21,15 @@ for i=1:ntrials
         %% finding the Autoplay target location for monkey 2 (autoplayTarget_x_2)
         tx = autoplayTarget_x_2(autoplayTarget_x_2(:,2) > start & autoplayTarget_x_2(:,2) < finish,1);
         ty = autoplayTarget_y_2(autoplayTarget_y_2(:,2) > start & autoplayTarget_y_2(:,2) < finish,1);
+        
+        % weed out some spurious transitions in autoplayTarget positions
+        if length(tx) > 1 
+            tx = tx(end);
+        end
+        if length(ty) > 1 
+            ty = ty(end);
+        end
+            
         trial(i).autoplayTarget = [tx ty];
         clear tx ty
         catch
