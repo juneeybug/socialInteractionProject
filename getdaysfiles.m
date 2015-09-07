@@ -32,5 +32,4 @@ function f = getdaysfiles(datepath, monkey, varargin)
   mon = strpath(5:6);
 
   dirpath = fullfile(DATADIR,monkey,year,mon,strpath);
-
   f = get_recursive_filenames(dirpath,ffilter,isregexp);
