@@ -15,11 +15,15 @@ ST_MONKEY_WAIT= 207;         %monkey is waiting for other monkey to finish
 
 % Add monkey state to trial structure
 for i=1:ntrials
-   trial(i).monkey0State = monkey_0_state(find(monkey_0_state(:,2)>trial(i).start_t & monkey_0_state(:,2)<trial(i).end_t),1);
-   trial(i).monkey0State_t = monkey_0_state(find(monkey_0_state(:,2)>trial(i).start_t & monkey_0_state(:,2)<trial(i).end_t),2);
+    
+   start = trial(i).states_t(trial(i).states == 101);
+   finish = trial(i).states_t(trial(i).states == 108);
+    
+   trial(i).monkey0State = monkey_0_state((monkey_0_state(:,2)>start & monkey_0_state(:,2)<finish),1);
+   trial(i).monkey0State_t = monkey_0_state((monkey_0_state(:,2)>start & monkey_0_state(:,2)<finish),2);
    
-   trial(i).monkey1State = monkey_1_state(find(monkey_1_state(:,2)>trial(i).start_t & monkey_1_state(:,2)<trial(i).end_t),1);
-   trial(i).monkey1State_t = monkey_1_state(find(monkey_1_state(:,2)>trial(i).start_t & monkey_1_state(:,2)<trial(i).end_t),2);
+   trial(i).monkey1State = monkey_1_state((monkey_1_state(:,2)>start & monkey_1_state(:,2)<finish),1);
+   trial(i).monkey1State_t = monkey_1_state((monkey_1_state(:,2)>start & monkey_1_state(:,2)<finish),2);
     
 end  
 
