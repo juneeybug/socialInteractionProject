@@ -3,9 +3,9 @@
 
 batchprocess.m lists all the data sessions and can call all the other functions.
 
-  convertPlx2mat.m - converts Plexon ".plx" files to ".mat". To use this function fork the "plx2mat" repo. 
+  /t convertPlx2mat.m - converts Plexon ".plx" files to ".mat". To use this function fork the "plx2mat" repo. 
 
-  preProcess.m
+  /t preProcess.m
     bmi_parse.m - aligns the time stamps of BMI with those from Plexon. 
     parseDatafile - parses the session into a "trial" structure.
     
