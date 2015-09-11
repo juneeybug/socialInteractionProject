@@ -62,21 +62,21 @@ for j=1:length(goodtrial)
         % positions
         xpos = x1(time);
         ypos = y1(time);
-        dpos = sqrt(xpos.^2+ypos.^2);
-        ddpos = dpos-dpos(1);
+        pos = sqrt(xpos.^2+ypos.^2);
+        dpos = pos-pos(1);
         
         % smoothened velocities
-        xt = vx1(time);
-        yt = vy1(time);
+        Vx = vx1(time);
+        Vy = vy1(time);
         timet = j_time(time);
-        dt = sqrt(xt.^2+yt.^2);
-        ddt = dt-dt(1);
+        V = sqrt(Vx.^2+Vy.^2);
+        dV = V-V(1);
         
         % raw velocities
-        xtU = vx1U(time);
-        ytU = vy1U(time);
-        dtU = sqrt(xtU.^2+ytU.^2);
-        ddtU = dtU-dtU(1);
+        rVx = vx1U(time);
+        rVy = vy1U(time);
+        rV = sqrt(rVx.^2+rVy.^2);
+        drV = rV-rV(1);
         
         
         %% Method: Identify the time when the maximum velocity was attained.
@@ -84,10 +84,11 @@ for j=1:length(goodtrial)
         
         % find the time of peak velocity using the smoothened velocity
         % profile.
-        maxposindex = find(ddpos == max(ddpos));
-        pvIndex = find(ddt== max(ddt));
+        maxposindex = find(dpos == max(dpos));
+        
+        pvIndex = find(dV== max(dV));
         if pvIndex > maxposindex
-            pvIndex = find(ddt== max(ddt(1:maxposindex)));
+            pvIndex = find(dV== max(dV(1:maxposindex)));
         end
         peakVelTime = timet(pvIndex);
         
@@ -106,7 +107,7 @@ for j=1:length(goodtrial)
                 % conditions: 1. velocity should be 6 times lesser than peak
                 % velocity 2. velocity at time=t should be lesser than two
                 % previous velocity estimates.
-                if ddt(pvIndex-k) < max(ddt)/6 & ddt(pvIndex-k) < ddt(pvIndex-k+1) & ddt(pvIndex-k) < ddt(pvIndex-k+2) & sflag==0
+                if dV(pvIndex-k) < max(dV)/6 & dV(pvIndex-k) < dV(pvIndex-k+1) & dV(pvIndex-k) < dV(pvIndex-k+2) & sflag==0
                     startIndex = pvIndex-k;
                     sflag=1;
                 end
@@ -114,12 +115,12 @@ for j=1:length(goodtrial)
             
             % marking the end
             till = 50;
-            if length(ddt) <  pvIndex+50 % taking care of 50-2
-                till = length(ddt) - pvIndex;
+            if length(dV) <  pvIndex+50 % taking care of 50-2
+                till = length(dV) - pvIndex;
             end
             
             for k=1:till
-                if ddt(pvIndex+k) < max(ddt)/6 & ddt(pvIndex+k) < ddt(pvIndex+k-1) & ddt(pvIndex+k) < ddt(pvIndex+k-2) & eflag==0
+                if dV(pvIndex+k) < max(dV)/6 & dV(pvIndex+k) < dV(pvIndex+k-1) & dV(pvIndex+k) < dV(pvIndex+k-2) & eflag==0
                     endIndex = pvIndex+k;
                     eflag=1;
                 end
@@ -128,13 +129,14 @@ for j=1:length(goodtrial)
             % Count the trials in which beginning and end were not found
             if sflag==0
                 warning('beginning not found in trial %s',num2str(j));
-                startIndex = pvIndex-k;
+                startIndex = pvIndex-k;                
                 ss=ss+1;
+                break;
             end
             
             if eflag==0
                 warning('ending not found in trial %s',num2str(j));
-                endIndex = pvIndex+k;
+                endIndex = pvIndex+k;                
                 ee=ee+1;
             end
             
@@ -144,13 +146,18 @@ for j=1:length(goodtrial)
             
             RT(j) = startVelTime - ttrial(i);
             MT(j) = endVelTime - startVelTime;
-            avgVel(j) = mean(dtU(startIndex:endIndex));
+            avgVel(j) = mean(rV(startIndex:endIndex));
             
+            if eflag==0 % end of the movement was not found correctly
+                MT(j) = nan;
+                avgVel(j) = nan;
+            end            
+                       
             if plotflag
-                plot(timet,ddt,'-k.')
+                plot(timet,dV,'-k.')
                 hold on
-                plot(timet,ddpos,'-r.')
-                plot(timet,ddtU,'-b.')
+                plot(timet,dpos,'-r.')
+                plot(timet,drV,'-b.')
                 plot([startVelTime startVelTime],[-5 25],'b')
                 plot([endVelTime endVelTime],[-5 25],'b')
                 plot([peakVelTime peakVelTime],[-5 25],'r')
@@ -162,9 +169,6 @@ for j=1:length(goodtrial)
         catch
             warning('onset and end of joystick movement not found in trial %s ',num2str(j));
         end
-        
-        clear ddt dt xpos ypos xt yt timet
-        
         
     end
     
