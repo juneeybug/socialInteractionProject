@@ -15,6 +15,22 @@ for i=1:ntrials
         %% finding the target location
         tx = target_x(target_x(:,2) > start & target_x(:,2) < finish,1);
         ty = target_y(target_y(:,2) > start & target_y(:,2) < finish,1);
+        
+        if length(tx) < 1 | length(ty) < 1
+            trial(i).target = [nan nan];
+            break;
+        end
+        
+        
+        
+        % weed out some spurious transitions in Target positions
+        if length(tx) > 1 
+            tx = tx(end);
+        end
+        if length(ty) > 1 
+            ty = ty(end);
+        end
+        
         trial(i).target = [tx ty];
         clear tx ty 
         
