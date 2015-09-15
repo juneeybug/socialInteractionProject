@@ -4,6 +4,7 @@ ntrials=size(trial,2);
 
 for i=1:ntrials
     tstates = find(trial(i).states ==103);
+    
     % if ((trial(i).outcome == 104)||(trial(i).outcome == 105)||(trial(i).outcome == 106)||(trial(i).outcome == 107))
      if ~isempty(tstates)   
         % target location is logged at state = 103, so looking around that
@@ -16,12 +17,15 @@ for i=1:ntrials
         tx = target_x(target_x(:,2) > start & target_x(:,2) < finish,1);
         ty = target_y(target_y(:,2) > start & target_y(:,2) < finish,1);
         
-        if length(tx) < 1 | length(ty) < 1
-            trial(i).target = [nan nan];
-            break;
+        % in sessions before May '13, omitdup was ON, target position was logged only if it changed
+        % So, if no entry found for the current trial at state 103, the last set value is picked. 
+        if length(tx) < 1 
+            tx = target_x(find(target_x(:,2) < finish,1,'last')); 
         end
         
-        
+        if length(ty) < 1 
+            ty = target_y(find(target_y(:,2) < finish,1,'last')); 
+        end
         
         % weed out some spurious transitions in Target positions
         if length(tx) > 1 
@@ -38,6 +42,16 @@ for i=1:ntrials
         tx = autoplayTarget_x_2(autoplayTarget_x_2(:,2) > start & autoplayTarget_x_2(:,2) < finish,1);
         ty = autoplayTarget_y_2(autoplayTarget_y_2(:,2) > start & autoplayTarget_y_2(:,2) < finish,1);
         
+        % handling omitdup = 1 as previously mentioned.
+        if length(tx) < 1 
+            tx = autoplayTarget_x_2(find(autoplayTarget_x_2(:,2) < finish,1,'last')); 
+        end
+        
+        if length(ty) < 1 
+            ty = autoplayTarget_y_2(find(autoplayTarget_y_2(:,2) < finish,1,'last')); 
+        end
+        
+               
         % weed out some spurious transitions in autoplayTarget positions
         if length(tx) > 1 
             tx = tx(end);
@@ -51,7 +65,9 @@ for i=1:ntrials
         catch
             warning('inconsistencies in target/ autoplaytarget locations')
         end
-    end
+     else
+        trial(i).target = [nan nan];
+        trial(i).autoplayTarget = [nan nan]; 
 end
 
 y=1;
