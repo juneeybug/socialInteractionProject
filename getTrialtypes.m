@@ -15,9 +15,13 @@ autoplayTargetpos = ones(ntrials,1).*nan;
 tpos = reshape([trial.target],2,ntrials);
 temp = tpos(1,:).*tpos(2,:);
 
-targetpos(temp < 0)  = 2;
-targetpos(temp == 0) = 3;
-targetpos(temp > 0)  = 4;
+%          pos 3
+%  pos 4           pos 2
+
+targetpos(temp < 0)        = 2;
+targetpos(temp == 0)       = 3;
+targetpos(temp > 0)        = 4;
+targetpos(isnan(temp))     = nan;
 
 clear tpos temp
 
@@ -30,6 +34,7 @@ autoplayTargetpos(temp == 0 & tpos(2,:) == 0) = 1;
 autoplayTargetpos(temp < 0)                   = 2;
 autoplayTargetpos(temp == 0 & tpos(2,:) > 0)  = 3;
 autoplayTargetpos(temp > 0)                   = 4;
+autoplayTargetpos(isnan(temp))                = nan;
 
 clear tpos temp
 
