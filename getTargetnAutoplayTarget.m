@@ -68,6 +68,7 @@ for i=1:ntrials
      else
         trial(i).target = [nan nan];
         trial(i).autoplayTarget = [nan nan]; 
+     end
 end
 
 y=1;
