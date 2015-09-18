@@ -1,5 +1,7 @@
 function varargout = getRT(sessiondate)
-plotflag=0;
+
+% change while testing code
+plotflag=1;
 saveflag=0;
 
 getBehavioralFileIndicies;
@@ -16,19 +18,24 @@ SRATE=100; % resample at 100 Hz.
 [y1_raw, ty1] =loadandresamp('js_y',fm{1},SRATE);
 j_time = tx1; % joystick time
 
-% standardize the movement positions
-x1 = (x1_raw - mean(x1_raw))./std(x1_raw);
-y1 = (y1_raw - mean(y1_raw))./std(y1_raw);
+% standardize the movement positions.
+x1_stan = (x1_raw - mean(x1_raw))./std(x1_raw);
+y1_stan = (y1_raw - mean(y1_raw))./std(y1_raw);
+
+% low pass filter before finding instantaneous velocity
+% 2nd order Butterworth filter with 10Hz cut off frequence for joystick
+% movement sample at 100Hz.
+[b,a]=butter(2,10*2/100,'low');
+x1=filtfilt(b,a,x1_stan);
+y1=filtfilt(b,a,y1_stan);
 
 % compute instantaneous velocities
 vx1U = diff(x1)./diff(tx1);
 vy1U = diff(y1)./diff(ty1);
 
-% smoothen the velovity data with a moving Gaussian kernel
-h = fspecial('gaussian', [20 1], 20);
-vx1 = imfilter(vx1U,h,'same');
-vy1 = imfilter(vy1U,h,'same');
-
+% smoothen velocity data with a moving Gaussian kernel
+vx1 = myGaussianFilter(20,20,vx1U);
+vy1 = myGaussianFilter(20,20,vy1U);
 
 %  GET GOOD TRIALS  = ALL trials
 goodtrial = 1:size(trial,2);
